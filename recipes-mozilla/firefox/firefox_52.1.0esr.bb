@@ -33,6 +33,7 @@ PR = "r0"
 S = "${WORKDIR}/firefox-${PV}"
 #MOZ_APP_BASE_VERSION = "${@'${PV}'.replace('esr', '')}"
 MOZ_APP_BASE_VERSION = "52.1.0"
+NOBRANDING_NAME = "embedded-gecko"
 
 inherit mozilla
 
@@ -157,12 +158,12 @@ do_install_append() {
 
     install -m 0644 ${WORKDIR}/mozilla-firefox.desktop ${D}${datadir}/applications/
     install -m 0644 ${WORKDIR}/mozilla-firefox.png ${D}${datadir}/pixmaps/
-    install -m 0644 ${WORKDIR}/vendor.js ${D}${libdir}/${PN}-${MOZ_APP_BASE_VERSION}/defaults/pref/
+    install -m 0644 ${WORKDIR}/vendor.js ${D}${libdir}/${NOBRANDING_NAME}-${MOZ_APP_BASE_VERSION}/defaults/pref/
     if [ -n "${@bb.utils.contains_any('PACKAGECONFIG', 'glx egl', '1', '', d)}" ]; then
-        install -m 0644 ${WORKDIR}/gpu.js ${D}${libdir}/${PN}-${MOZ_APP_BASE_VERSION}/defaults/pref/
+        install -m 0644 ${WORKDIR}/gpu.js ${D}${libdir}/${NOBRANDING_NAME}-${MOZ_APP_BASE_VERSION}/defaults/pref/
     fi
     if [ -n "${@bb.utils.contains('PACKAGECONFIG', 'openmax', '1', '', d)}" ]; then
-        install -m 0644 ${WORKDIR}/openmax/openmax.js ${D}${libdir}/${PN}-${MOZ_APP_BASE_VERSION}/defaults/pref/
+        install -m 0644 ${WORKDIR}/openmax/openmax.js ${D}${libdir}/${NOBRANDING_NAME}-${MOZ_APP_BASE_VERSION}/defaults/pref/
     fi
 
     # Fix ownership of files
@@ -170,21 +171,21 @@ do_install_append() {
     chown root:root -R ${D}${libdir}
 }
 
-FILES_${PN} = "${bindir}/${PN} \
+FILES_${PN} = "${bindir}/${NOBRANDING_NAME} \
                ${datadir}/applications/ \
                ${datadir}/pixmaps/ \
-               ${libdir}/${PN}-${MOZ_APP_BASE_VERSION}/* \
-               ${libdir}/${PN}-${MOZ_APP_BASE_VERSION}/.autoreg \
+               ${libdir}/${NOBRANDING_NAME}-${MOZ_APP_BASE_VERSION}/* \
+               ${libdir}/${NOBRANDING_NAME}-${MOZ_APP_BASE_VERSION}/.autoreg \
                ${bindir}/defaults"
-FILES_${PN}-dev += "${datadir}/idl ${bindir}/${PN}-config ${libdir}/${PN}-devel-*"
-FILES_${PN}-staticdev += "${libdir}/${PN}-devel-*/sdk/lib/*.a"
-FILES_${PN}-dbg += "${libdir}/${PN}-${MOZ_APP_BASE_VERSION}/.debug \
-                    ${libdir}/${PN}-${MOZ_APP_BASE_VERSION}/*/.debug \
-                    ${libdir}/${PN}-${MOZ_APP_BASE_VERSION}/*/*/.debug \
-                    ${libdir}/${PN}-${MOZ_APP_BASE_VERSION}/*/*/*/.debug \
-                    ${libdir}/${PN}-devel-*/*/.debug \
-                    ${libdir}/${PN}-devel-*/*/*/.debug \
-                    ${libdir}/${PN}-devel-*/*/*/*/.debug \
+FILES_${PN}-dev += "${datadir}/idl ${bindir}/${NOBRANDING_NAME}-config ${libdir}/${NOBRANDING_NAME}-devel-*"
+FILES_${PN}-staticdev += "${libdir}/${NOBRANDING_NAME}-devel-*/sdk/lib/*.a"
+FILES_${PN}-dbg += "${libdir}/${NOBRANDING_NAME}-${MOZ_APP_BASE_VERSION}/.debug \
+                    ${libdir}/${NOBRANDING_NAME}-${MOZ_APP_BASE_VERSION}/*/.debug \
+                    ${libdir}/${NOBRANDING_NAME}-${MOZ_APP_BASE_VERSION}/*/*/.debug \
+                    ${libdir}/${NOBRANDING_NAME}-${MOZ_APP_BASE_VERSION}/*/*/*/.debug \
+                    ${libdir}/${NOBRANDING_NAME}-devel-*/*/.debug \
+                    ${libdir}/${NOBRANDING_NAME}-devel-*/*/*/.debug \
+                    ${libdir}/${NOBRANDING_NAME}-devel-*/*/*/*/.debug \
                     ${bindir}/.debug"
 
 # We don't build XUL as system shared lib, so we can mark all libs as private
