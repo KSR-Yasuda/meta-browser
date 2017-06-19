@@ -23,6 +23,9 @@ SRC_URI = "https://archive.mozilla.org/pub/firefox/releases/${PV}/source/firefox
            file://mozconfig \
            "
 
+SRC_URI += "file://nobranding/nobranding_embedded_gecko.sh \
+           "
+
 SRC_URI[archive.md5sum] = "2d8175512710bb1df5a1fb0f0a2b1bd8"
 SRC_URI[archive.sha256sum] = "da2ba9630b8b56c6f5d36d9f3da2d984ef7986dc8b4d804f6947fcea6c24637d"
 
@@ -142,6 +145,11 @@ python do_check_variables() {
         bb.warn("%s: GLX support will be disabled when EGL is enabled!" % bb.data.getVar('PN', d, 1))
 }
 addtask check_variables before do_configure
+
+do_compile_prepend() {
+    (cd "${S}"
+    "${WORKDIR}/nobranding/nobranding_embedded_gecko.sh")
+}
 
 do_install_append() {
     install -d ${D}${datadir}/applications
