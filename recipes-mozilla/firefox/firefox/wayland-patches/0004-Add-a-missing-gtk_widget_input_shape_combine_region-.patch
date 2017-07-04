@@ -1,0 +1,25 @@
+From 376a6f28e6167dd45b2918aaced708ae4721d9ac Mon Sep 17 00:00:00 2001
+From: Hiroshi Hatake <hatake@clear-code.com>
+Date: Tue, 4 Jul 2017 17:44:30 +0900
+Subject: [PATCH 4/4] Add a missing gtk_widget_input_shape_combine_region gtk
+ function STUB
+
+---
+ widget/gtk/mozgtk/mozgtk.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/widget/gtk/mozgtk/mozgtk.c b/widget/gtk/mozgtk/mozgtk.c
+index c9d554a21355..48ffc623487b 100644
+--- a/widget/gtk/mozgtk/mozgtk.c
++++ b/widget/gtk/mozgtk/mozgtk.c
+@@ -421,6 +421,7 @@ STUB(gtk_tree_view_get_type)
+ STUB(gtk_tree_view_new)
+ STUB(gtk_vbox_new)
+ STUB(gtk_widget_add_events)
++STUB(gtk_widget_input_shape_combine_region)
+ STUB(gtk_widget_class_find_style_property)
+ STUB(gtk_widget_destroy)
+ STUB(gtk_widget_destroyed)
+-- 
+2.11.0
+
