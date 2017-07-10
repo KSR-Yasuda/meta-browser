@@ -1,0 +1,80 @@
+From eff4ccbfbc7112e0645846b7bec8a12697c4d293 Mon Sep 17 00:00:00 2001
+From: Hiroshi Hatake <hatake@clear-code.com>
+Date: Mon, 10 Jul 2017 15:19:50 +0900
+Subject: [PATCH] Handle clicking event in weston (rhbz#1467792)
+
+To enable to handle clicking events in popup menu on weston,
+it seems to be needed to call nsWindow.CaptureRollUpEvents() in
+nsXULPopupManager.Rollup().
+---
+ layout/xul/nsXULPopupManager.cpp | 5 ++++-
+ widget/gtk/nsWindow.cpp          | 6 ++++++
+ widget/gtk/nsWindow.h            | 1 +
+ widget/nsIWidget.h               | 6 ++++++
+ 4 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/layout/xul/nsXULPopupManager.cpp b/layout/xul/nsXULPopupManager.cpp
+index 6e8cc3dda1d6..758b08a95e14 100644
+--- a/layout/xul/nsXULPopupManager.cpp
++++ b/layout/xul/nsXULPopupManager.cpp
+@@ -192,7 +192,10 @@ nsXULPopupManager::Rollup(uint32_t aCount, bool aFlush,
+                           const nsIntPoint* pos, nsIContent** aLastRolledUp)
+ {
+   // We can disable the autohide behavior via a pref to ease debugging.
+-  if (nsXULPopupManager::sDevtoolsDisableAutoHide) {
++  // On weston, we should handle clicking event on mContainer instead
++  // of mShell in nsWindow class.
++  if (mWidget->ShouldHavePriorityToCaptureRollupEvents() ||
++      nsXULPopupManager::sDevtoolsDisableAutoHide) {
+     // Required on linux to allow events to work on other targets.
+     if (mWidget) {
+       mWidget->CaptureRollupEvents(nullptr, false);
+diff --git a/widget/gtk/nsWindow.cpp b/widget/gtk/nsWindow.cpp
+index 6291f33e9ecd..c444cdd7fa87 100644
+--- a/widget/gtk/nsWindow.cpp
++++ b/widget/gtk/nsWindow.cpp
+@@ -1948,6 +1948,12 @@ nsWindow::CaptureMouse(bool aCapture)
+     }
+ }
+ 
++bool
++nsWindow::ShouldHavePriorityToCaptureRollupEvents()
++{
++    return !mIsX11Display;
++}
++
+ void
+ nsWindow::CaptureRollupEvents(nsIRollupListener *aListener,
+                               bool               aDoCapture)
+diff --git a/widget/gtk/nsWindow.h b/widget/gtk/nsWindow.h
+index 8acf88bc6a53..b7b62eadd443 100644
+--- a/widget/gtk/nsWindow.h
++++ b/widget/gtk/nsWindow.h
+@@ -151,6 +151,7 @@ public:
+     virtual void       CaptureMouse(bool aCapture) override;
+     virtual void       CaptureRollupEvents(nsIRollupListener *aListener,
+                                            bool aDoCapture) override;
++    virtual bool       ShouldHavePriorityToCaptureRollupEvents() override;
+     NS_IMETHOD         GetAttention(int32_t aCycleCount) override;
+     virtual nsresult   SetWindowClipRegion(const nsTArray<LayoutDeviceIntRect>& aRects,
+                                            bool aIntersectWithExisting) override;
+diff --git a/widget/nsIWidget.h b/widget/nsIWidget.h
+index 2d14cc107f11..238f89ce6c0c 100644
+--- a/widget/nsIWidget.h
++++ b/widget/nsIWidget.h
+@@ -1397,6 +1397,12 @@ class nsIWidget : public nsISupports
+     virtual void SetWindowClass(const nsAString& xulWinType) = 0;
+ 
+     /**
++     * Set should have priority to caputure rollup events.
++     * Mainly used for events related fixes for weston.
++     */
++    virtual bool ShouldHavePriorityToCaptureRollupEvents() { return false; };
++
++    /**
+      * Enables/Disables system capture of any and all events that would cause a
+      * popup to be rolled up. aListener should be set to a non-null value for
+      * any popups that are not managed by the popup manager.
+-- 
+2.11.0
+
