@@ -106,61 +106,70 @@ do_dump_env(){
         mkdir -p           `dirname ${LOGFILE}`
     fi
 
+    echo "\n<RUSTC>"                    >> ${LOGFILE}
     echo ${RUSTC}                       >> ${LOGFILE}
-    echo ""                             >> ${LOGFILE}
 
+    echo "\n<RUST_BUILD>"               >> ${LOGFILE}
     echo ${RUST_BUILD_SYS}              >> ${LOGFILE}
     echo ${RUST_BUILD_CC}               >> ${LOGFILE}
     echo ${RUST_BUILD_CXX}              >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<RUST_HOST>"                >> ${LOGFILE}
     echo ${RUST_HOST_SYS}               >> ${LOGFILE}
     echo ${RUST_HOST_CC}                >> ${LOGFILE}
     echo ${RUST_HOST_CXX}               >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<RUST_TARGET>"              >> ${LOGFILE}
     echo ${RUST_TARGET_SYS}             >> ${LOGFILE}
     echo ${RUST_TARGET_CC}              >> ${LOGFILE}
     echo ${RUST_TARGET_CXX}             >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<WORKDIR>"                  >> ${LOGFILE}
     echo `pwd`                          >> ${LOGFILE}
     echo ${S}                           >> ${LOGFILE}
     echo ${WORKDIR}                     >> ${LOGFILE}
+    echo ${D}                           >> ${LOGFILE}
+    echo ${bindir}                      >> ${LOGFILE}
+    echo ${includedir}                  >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<STAGING_BINDIR>"           >> ${LOGFILE}
     echo ${STAGING_BINDIR}              >> ${LOGFILE}
     echo ${STAGING_BINDIR_CROSS}        >> ${LOGFILE}
     echo ${STAGING_BINDIR_NATIVE}       >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<STAGING_INCDIR>"           >> ${LOGFILE}
+    echo ${STAGING_INCDIR}              >> ${LOGFILE}
+    echo ${STAGING_INCDIR_CROSS}        >> ${LOGFILE}
+    echo ${STAGING_INCDIR_NATIVE}       >> ${LOGFILE}
+
+    echo "\n<BINDIR>"                   >> ${LOGFILE}
     echo ${bindir}                      >> ${LOGFILE}
     echo ${BINDIR}                      >> ${LOGFILE}
     echo ${BUILD_PREFIX}                >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<CC>"                       >> ${LOGFILE}
     echo ${CC}                          >> ${LOGFILE}
     echo ${LD}                          >> ${LOGFILE}
     echo ${CXX}                         >> ${LOGFILE}
     echo ${CFLAGS}                      >> ${LOGFILE}
     echo ${CXXFLAGS}                    >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<HOST_CC>"                  >> ${LOGFILE}
     echo ${HOST_CC}                     >> ${LOGFILE}
     echo ${HOST_LD}                     >> ${LOGFILE}
     echo ${HOST_CXX}                    >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<BUILD_ARCH>"               >> ${LOGFILE}
     echo ${BUILD_ARCH}                  >> ${LOGFILE}
     echo ${BUILD_OS}                    >> ${LOGFILE}
     echo ${BUILD_SYS}                   >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<HOST_ARCH>"                >> ${LOGFILE}
     echo ${HOST_ARCH}                   >> ${LOGFILE}
     echo ${HOST_OS}                     >> ${LOGFILE}
     echo ${HOST_SYS}                    >> ${LOGFILE}
 
-    echo ""                             >> ${LOGFILE}
+    echo "\n<TARGET_ARCH>"              >> ${LOGFILE}
     echo ${TARGET_ARCH}                 >> ${LOGFILE}
     echo ${TARGET_OS}                   >> ${LOGFILE}
     echo ${TARGET_SYS}                  >> ${LOGFILE}
