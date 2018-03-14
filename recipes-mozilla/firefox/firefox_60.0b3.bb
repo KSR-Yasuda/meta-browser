@@ -11,14 +11,16 @@ RDEPENDS_${PN}-dev = "dbus"
 LICENSE = "MPLv2 | GPLv2+ | LGPLv2.1+"
 LIC_FILES_CHKSUM = "file://toolkit/content/license.html;endline=33;md5=f51d0fbc370c551d7371775b4f6544ca"
 
-SRC_URI = "git://github.com/mozilla/gecko-dev.git;branch=master \
+MOZ_HG_REV="93daac564022a618daa8ae32c422a0ffac8a73d0"
+
+SRC_URI = "https://hg.mozilla.org/releases/mozilla-beta/archive/${MOZ_HG_REV}.tar.bz2;name=archive \
            file://mozconfig \
            file://mozilla-firefox.png \
            file://mozilla-firefox.desktop \
            file://prefs/vendor.js \
            file://prefs/autoconfig.js \
            file://prefs/autoconfig.cfg \
-           file://fixes/rustc_target_force.patch \
+           file://fixes/0001-Enable-to-specify-RUST_TARGET-via-enviroment-variabl.patch \
            file://fixes/0001-Always-accept-the-configure-option-with-gl-provider.patch \
            file://fixes/0001-Fix-a-build-error-of-Gecko-Profiler-for-Linux-ARM.patch \
            file://fixes/0001-Add-a-preference-to-force-enable-touch-events-withou.patch \
@@ -26,11 +28,11 @@ SRC_URI = "git://github.com/mozilla/gecko-dev.git;branch=master \
            file://gn-configs/ \
            "
 
-#FIXME: Set exact source revision
-SRCREV = "${AUTOREV}"
+SRC_URI[archive.md5sum] = "6b6fc962b4d157f9fd7271364d81dc9e"
+SRC_URI[archive.sha256sum] = "0d7a9b1ba4bc7709d05aa7e6c0646e6adc37670cffd13cbb4a9d4f437cf60d53"
 
 PR = "r0"
-S = "${WORKDIR}/git"
+S = "${WORKDIR}/mozilla-beta-${MOZ_HG_REV}"
 MOZ_APP_BASE_VERSION = "${@'${PV}'.replace('esr', '')}"
 
 inherit mozilla
@@ -65,11 +67,14 @@ SRC_URI += "${@bb.utils.contains('PACKAGECONFIG', 'wayland', \
 # TODO: Most of them aren't ported to ESR60 yet
 SRC_URI += "${@bb.utils.contains('PACKAGECONFIG', 'wayland egl', \
            ' \
+            file://wayland/egl/0001-GLLibraryEGL-Use-wl_display-to-get-EGLDisplay-on-Way.patch \
+            file://wayland/egl/0002-Disable-query-EGL_EXTENSIONS.patch \
+            file://wayland/egl/0003-Use-wl_egl_window-as-a-native-EGL-window-on-Wayland.patch \
+            file://wayland/egl/0004-Repaint-on-resize-asynchronously.patch \
             file://wayland/egl/0001-GLLibraryLoader-Use-given-symbol-lookup-function-fir.patch \
             file://wayland/egl/0001-Enable-sharing-SharedSurface_EGLImage.patch \
             file://wayland/egl/0001-Call-fEGLImageTargetTexture2D-eariler.patch \
             file://wayland/egl/0001-Create-workaround-to-use-BasicCompositor-to-prevent-.patch \
-            file://prefs/disable-e10s.js \
            ', \
            '', d)}"
 
@@ -147,6 +152,11 @@ do_configure() {
                            -I${INC_CPP}/${TARGET_SYS} \
                            -I${INC_LLVM}"
 
+    # TODO:
+    # It will be removed later.
+    # It should be used only by local.conf or vendor's layer.
+    export RUST_TARGET="armv7-unknown-linux-gnueabihf"
+
     ./mach configure ${CONFIGURE_ARGS}
     cp ${WORKDIR}/gn-configs/*.json ${S}/media/webrtc/gn-configs/
     ./mach build-backend -b GnMozbuildWriter
@@ -182,9 +192,6 @@ do_install_append() {
     fi
     if [ -n "${@bb.utils.contains('PACKAGECONFIG', 'wayland', '1', '', d)}" ]; then
         install -m 0644 ${WORKDIR}/wayland/wayland-hacks.js ${D}${libdir}/${PN}/defaults/pref/
-    fi
-    if [ -n "${@bb.utils.contains('PACKAGECONFIG', 'wayland egl', '1', '', d)}" ]; then
-        install -m 0644 ${WORKDIR}/prefs/disable-e10s.js ${D}${libdir}/${PN}/defaults/pref/
     fi
     if [ -n "${@bb.utils.contains('PACKAGECONFIG', 'webgl', '1', '', d)}" ]; then
         install -m 0644 ${WORKDIR}/prefs/webgl.js ${D}${libdir}/${PN}/defaults/pref/
