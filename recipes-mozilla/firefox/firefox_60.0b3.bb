@@ -124,8 +124,10 @@ def path_ver_cmp(a):
 
     return (var, os.path.dirname(a), os.path.basename(a))
 
-def search_path(pattern):
+def search_path(d, pattern):
     import glob
+
+    pattern = d.expand(pattern)
 
     result  = sorted(glob.glob(pattern), key=path_ver_cmp, reverse=True)
 
@@ -134,32 +136,49 @@ def search_path(pattern):
 
     return result
 
-do_configure() {
-    export SHELL=/bin/bash
-    export RUST_TARGET_PATH=${STAGING_LIBDIR_NATIVE}/rustlib
+def configure(d):
+    import os
+
+    os.environ['SHELL']             = "/bin/bash"
+    os.environ['RUST_TARGET_PATH']  = d.expand("${STAGING_LIBDIR_NATIVE}/rustlib")
 
     # TODO:
     # Detect include paths more decently.
     # In addition we should fix the build sysetem of firefox instead of
     # setting BINDGEN_CFLAGS.
-    #
-    INC_CPP='${@search_path("${STAGING_INCDIR}/c++/*")}'
-    INC_LLVM='${@search_path("/usr/lib/llvm-*/**/clang/*/include")}'
+    try:
+        INC_CPP     = search_path(d, "${STAGING_INCDIR}/c++/*")
+    except:
+        INC_CPP     = search_path(d, \
+                        "${{TMPDIR}}/work/${{MULTIMACH_TARGET_SYS}}/gcc-runtime/{0}*/sysroot-destdir/usr/include/c++/*" \
+                            .format( \
+                                "linaro-" \
+                                    if "${PREFERRED_VERSION_gcc-runtime}" == "" else \
+                                "${PREFERRED_VERSION_gcc-runtime}" \
+                            ) \
+                      )
 
-    export BINDGEN_CFLAGS="${BINDGEN_CFLAGS} \
-                           --target=${TARGET_SYS} \
-                           -I${INC_CPP} \
-                           -I${INC_CPP}/${TARGET_SYS} \
-                           -I${INC_LLVM}"
+    INC_LLVM    = search_path(d, "/usr/lib/llvm-*/**/clang/*/include")
+
+    os.environ['BINDGEN_CFLAGS'] = d.expand( \
+                                        "${BINDGEN_CFLAGS} " \
+                                        "--target=${TARGET_SYS} " \
+                                        "-I${INC_CPP} " \
+                                        "-I${INC_CPP}/${TARGET_SYS} " \
+                                        "-I${INC_LLVM} " \
+                                   )
 
     # TODO:
     # It will be removed later.
     # It should be used only by local.conf or vendor's layer.
-    export RUST_TARGET="${RUST_TARGET_SYS}"
+    os.environ['RUST_TARGET'] = d.expand("${RUST_TARGET_SYS}")
 
-    ./mach configure ${CONFIGURE_ARGS}
-    cp ${WORKDIR}/gn-configs/*.json ${S}/media/webrtc/gn-configs/
-    ./mach build-backend -b GnMozbuildWriter
+    os.system(d.expand("./mach configure ${CONFIGURE_ARGS}"))
+    os.system(d.expand("cp ${WORKDIR}/gn-configs/*.json ${S}/media/webrtc/gn-configs/"))
+    os.system("./mach build-backend -b GnMozbuildWriter")
+
+python do_configure() {
+    configure(d)
 }
 
 do_compile() {
