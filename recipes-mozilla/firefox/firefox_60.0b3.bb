@@ -111,12 +111,6 @@ do_configure() {
     export SHELL=/bin/bash
     export RUST_TARGET_PATH=${STAGING_LIBDIR_NATIVE}/rustlib
 
-    export BINDGEN_CFLAGS="${BINDGEN_CFLAGS} \
-                           --target=${TARGET_SYS} \
-                           -I${STAGING_INCDIR}/c++/4.9.4 \
-                           -I${STAGING_INCDIR}/c++/4.9.4/${TARGET_SYS} \
-                           -I/usr/lib/llvm-3.9/lib/clang/3.9.1/include"
-
     # TODO:
     # It will be removed later.
     # It should be used only by local.conf or vendor's layer.
