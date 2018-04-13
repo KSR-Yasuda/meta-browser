@@ -1,0 +1,61 @@
+--- a/toolkit/components/autocomplete/nsAutoCompleteController.cpp	2018-04-02 11:12:51.494539999 +0900
++++ b/toolkit/components/autocomplete/nsAutoCompleteController.cpp	2018-04-13 15:24:29.278201717 +0900
+@@ -20,6 +20,8 @@
+ #include "mozilla/Unused.h"
+ #include "mozilla/dom/KeyboardEventBinding.h"
+ 
++#include "nsXULPopupManager.h"
++
+ static const char *kAutoCompleteSearchCID = "@mozilla.org/autocomplete/search;1?name=";
+ 
+ using namespace mozilla;
+@@ -129,10 +131,20 @@ nsAutoCompleteController::SetInput(nsIAu
+   if (mInput == aInput)
+     return NS_OK;
+ 
+-  Unused << ResetInternalState();
+-  if (mInput) {
+-    mSearches.Clear();
+-    ClosePopup();
++  if (nsXULPopupManager::getIsDisableAutoHide()) {
++    if (mInput) {
++      ClosePopup();
++    }
++
++    if (!aInput) {
++      return NS_OK;
++    }
++  } else {
++    Unused << ResetInternalState();
++    if (mInput) {
++      mSearches.Clear();
++      ClosePopup();
++    }
+   }
+ 
+   mInput = aInput;
+--- a/layout/xul/nsXULPopupManager.h	2018-04-10 17:55:48.009117867 +0900
++++ b/layout/xul/nsXULPopupManager.h	2018-04-13 14:37:22.134201717 +0900
+@@ -865,6 +865,11 @@ protected:
+ 
+   // If true, all popups won't hide automatically on blur
+   static bool sDevtoolsDisableAutoHide;
++
++public:
++  static bool getIsDisableAutoHide() {
++    return sDevtoolsDisableAutoHide;
++  }
+ };
+ 
+ #endif
+--- a/layout/xul/nsXULPopupManager.cpp	2018-04-05 12:23:44.281256004 +0900
++++ b/layout/xul/nsXULPopupManager.cpp	2018-04-13 15:26:17.122201717 +0900
+@@ -1082,7 +1082,7 @@ nsXULPopupManager::HidePopup(nsIContent*
+     }
+ 
+     // For menus, popupToHide is always the frontmost item in the list to hide.
+-    if (aAsynchronous) {
++    if (aAsynchronous || nsXULPopupManager::sDevtoolsDisableAutoHide) {
+       nsCOMPtr<nsIRunnable> event =
+         new nsXULPopupHidingEvent(popupToHide, nextPopup, lastPopup,
+                                   popupFrame->PopupType(), deselectMenu, aIsCancel);
